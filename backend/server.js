@@ -14,8 +14,17 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5174' }));
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5174',
+].filter(Boolean);
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(null, true); // allow all origins for MVP demo
+  },
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 
